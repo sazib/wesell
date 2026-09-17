@@ -1,0 +1,31 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}{{ category.name }} — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="{% url 'shop:home' %}">Home</a> / <span>{{ category.name }}</span>
+</nav>
+
+<section class="section category-head">
+  <h1>{{ category.name }}</h1>
+  <p>{{ category.description }}</p>
+  <form method="get" class="sort-form">
+    <label for="sort">Sort:</label>
+    <select name="sort" id="sort" onchange="this.form.submit()">
+      <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+      <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+      <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+      <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Top Rated</option>
+    </select>
+  </form>
+</section>
+
+<div class="product-grid">
+  {% for product in products %}
+    {% include 'shop/_product_card.html' %}
+  {% empty %}
+    <p class="empty">Nothing in this category yet — check back soon!</p>
+  {% endfor %}
+</div>
+{% endblock %}

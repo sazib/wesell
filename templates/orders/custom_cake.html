@@ -1,0 +1,127 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Custom Cake Studio — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section">
+  <nav class="breadcrumb"><a href="{% url 'shop:home' %}">Home</a> / <span>Custom Cake Studio</span></nav>
+
+  <div class="custom-hero">
+    <h1>🎨 Design Your Dream Cake</h1>
+    <p>Tell us your vision and our bakers will bring it to life. Upload a reference photo, choose your flavour and size, and we'll craft a one-of-a-kind cake just for you.</p>
+  </div>
+
+  <div class="checkout-grid">
+    <div class="checkout-form">
+      <form method="post" enctype="multipart/form-data" novalidate id="custom-cake-form">
+        {% csrf_token %}
+
+        <fieldset>
+          <legend>Cake Details</legend>
+          <div class="form-group{% if form.occasion.errors %} error{% endif %}">
+            <label for="{{ form.occasion.id_for_label }}">Occasion *</label>
+            {{ form.occasion }}
+            {% if form.occasion.errors %}<span class="field-error">{{ form.occasion.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.theme.errors %} error{% endif %}">
+            <label for="{{ form.theme.id_for_label }}">Theme / design idea</label>
+            {{ form.theme }}
+            {% if form.theme.errors %}<span class="field-error">{{ form.theme.errors|striptags }}</span>{% endif %}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Size &amp; Flavour</legend>
+          <div class="form-row">
+            <div class="form-group{% if form.size.errors %} error{% endif %}">
+              <label for="{{ form.size.id_for_label }}">Size *</label>
+              {{ form.size }}
+              {% if form.size.errors %}<span class="field-error">{{ form.size.errors|striptags }}</span>{% endif %}
+            </div>
+            <div class="form-group{% if form.flavor.errors %} error{% endif %}">
+              <label for="{{ form.flavor.id_for_label }}">Flavour *</label>
+              {{ form.flavor }}
+              {% if form.flavor.errors %}<span class="field-error">{{ form.flavor.errors|striptags }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="form-group{% if form.filling.errors %} error{% endif %}">
+            <label for="{{ form.filling.id_for_label }}">Filling</label>
+            {{ form.filling }}
+            {% if form.filling.errors %}<span class="field-error">{{ form.filling.errors|striptags }}</span>{% endif %}
+          </div>
+          <div id="price-preview" class="price-preview">
+            Estimated price: <strong>{{ base_price|intcomma }}</strong>
+          </div>
+          {{ form.base_price }}
+          {{ form.quantity }}
+        </fieldset>
+
+        <fieldset>
+          <legend>Reference Photo</legend>
+          <div class="form-group{% if form.reference_photo.errors %} error{% endif %}">
+            <label for="{{ form.reference_photo.id_for_label }}">Reference photo</label>
+            {{ form.reference_photo }}
+            {% if form.reference_photo.errors %}<span class="field-error">{{ form.reference_photo.errors|striptags }}</span>{% endif %}
+          </div>
+          <p class="form-hint">Share an image of the style, theme, or design you want</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Special Instructions</legend>
+          <div class="form-group{% if form.notes.errors %} error{% endif %}">
+            <label for="{{ form.notes.id_for_label }}">Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}<span class="field-error">{{ form.notes.errors|striptags }}</span>{% endif %}
+          </div>
+        </fieldset>
+
+        {% if form.non_field_errors %}
+        <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <div class="pdp-actions">
+          <button type="submit" class="btn btn-primary btn-lg">Send Custom Cake Request</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="checkout-sidebar">
+      <div class="sidebar-card">
+        <h3>How it works</h3>
+        <ol class="steps">
+          <li><strong>1. Describe</strong> — Tell us your occasion, theme, and preferences</li>
+          <li><strong>2. Upload</strong> — Share a reference photo of your dream cake</li>
+          <li><strong>3. Quote</strong> — We'll send you a quote within 24 hours</li>
+          <li><strong>4. Confirm</strong> — Pay, and we'll start baking!</li>
+        </ol>
+      </div>
+      <div class="sidebar-card">
+        <h3>Pricing starts at</h3>
+        <p class="price-big">{{ base_price|intcomma }}</p>
+        <p>Price varies by size, flavor, and decoration complexity</p>
+      </div>
+      <div class="sidebar-card">
+        <h3>Questions?</h3>
+        <p>Chat with us on <a href="https://wa.me/{{ whatsapp_number|default:'1234567890' }}" target="_blank" rel="noopener">WhatsApp</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const sizeExtras = {{ size_extras|safe }};
+  const basePrice = {{ base_price|stringformat:"f" }};
+
+  function updatePreview() {
+    const size = document.getElementById('id_size')?.value || '';
+    const extra = sizeExtras[size] || 0;
+    const qty = parseInt(document.getElementById('id_quantity')?.value || 1);
+    const total = (basePrice + extra) * qty;
+    const el = document.getElementById('price-preview');
+    if (el) el.innerHTML = `Estimated price: <strong>${total.toLocaleString()}</strong> × ${qty}`;
+  }
+  document.getElementById('id_size')?.addEventListener('change', updatePreview);
+</script>
+{% endblock %}

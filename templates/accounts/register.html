@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Register — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section auth-page">
+  <div class="auth-card">
+    <h1>Create Account</h1>
+    <p>Join us for faster checkout, order tracking, and reviews.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group{% if field.errors %} error{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<span class="field-error">{{ field.errors|striptags }}</span>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+    </form>
+    <p class="auth-alt">Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+  </div>
+</section>
+{% endblock %}

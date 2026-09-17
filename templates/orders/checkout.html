@@ -1,0 +1,138 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Checkout — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section checkout">
+  <nav class="breadcrumb"><a href="{% url 'cart:detail' %}">Cart</a> / <span>Checkout</span></nav>
+
+  <h1>Checkout</h1>
+  <p class="checkout-intro">Review your details below, then click <strong>Pay Now</strong> to confirm your order.</p>
+
+  <div class="checkout-grid">
+    <div class="checkout-form">
+      <form method="post" novalidate class="js-checkout-form">
+        {% csrf_token %}
+
+        <fieldset>
+          <legend>Contact Details</legend>
+          <div class="form-group{% if form.full_name.errors %} error{% endif %}">
+            <label for="{{ form.full_name.id_for_label }}">Full name</label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}<span class="field-error">{{ form.full_name.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.phone.errors %} error{% endif %}">
+            <label for="{{ form.phone.id_for_label }}">Phone number</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<span class="field-error">{{ form.phone.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.email.errors %} error{% endif %}">
+            <label for="{{ form.email.id_for_label }}">Email (optional)</label>
+            {{ form.email }}
+            {% if form.email.errors %}<span class="field-error">{{ form.email.errors|striptags }}</span>{% endif %}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Delivery Details</legend>
+          <div class="form-group{% if form.address.errors %} error{% endif %}">
+            <label for="{{ form.address.id_for_label }}">Shipping address</label>
+            {{ form.address }}
+            {% if form.address.errors %}<span class="field-error">{{ form.address.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.city.errors %} error{% endif %}">
+            <label for="{{ form.city.id_for_label }}">City</label>
+            {{ form.city }}
+            {% if form.city.errors %}<span class="field-error">{{ form.city.errors|striptags }}</span>{% endif %}
+          </div>
+          {{ form.grid_coords }}
+          <div class="form-group{% if form.delivery_area.errors %} error{% endif %}">
+            <label for="{{ form.delivery_area.id_for_label }}">Delivery area</label>
+            {{ form.delivery_area }}
+            {% if form.delivery_area.errors %}<span class="field-error">{{ form.delivery_area.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-row">
+            <div class="form-group{% if form.delivery_date.errors %} error{% endif %}">
+              <label for="{{ form.delivery_date.id_for_label }}">Delivery date</label>
+              {{ form.delivery_date }}
+              {% if form.delivery_date.errors %}<span class="field-error">{{ form.delivery_date.errors|striptags }}</span>{% endif %}
+            </div>
+            <div class="form-group{% if form.delivery_time_slot.errors %} error{% endif %}">
+              <label for="{{ form.delivery_time_slot.id_for_label }}">Time slot</label>
+              {{ form.delivery_time_slot }}
+              {% if form.delivery_time_slot.errors %}<span class="field-error">{{ form.delivery_time_slot.errors|striptags }}</span>{% endif %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-group{% if form.notes.errors %} error{% endif %}">
+            <label for="{{ form.notes.id_for_label }}">Special instructions</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}<span class="field-error">{{ form.notes.errors|striptags }}</span>{% endif %}
+          </div>
+        </fieldset>
+
+        {% if form.non_field_errors %}
+        <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <div class="checkout-totals">
+          <div>Subtotal: <strong>{{ cart.subtotal|intcomma }}</strong></div>
+          {% if running_offer %}
+          <div class="offer-discount" data-offer-discount>
+            Offer discount: <strong>-{{ discount|intcomma }}</strong> ({{ running_offer.discount_percent }}% off)
+          </div>
+          {% endif %}
+          <div>Delivery: <strong data-delivery-fee>{{ delivery_fee|intcomma }}</strong></div>
+          <div class="grand-total">Total: <strong data-total>{{ total|intcomma }}</strong></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block js-pay-now" data-disable-on-submit>
+          Pay Now — Total: {{ total|intcomma }}
+        </button>
+      </form>
+    </div>
+
+    <div class="checkout-sidebar">
+      <h3>Your Order</h3>
+      {% for item in cart.get_items %}
+      <div class="sidebar-item">
+        <div>
+          <strong>{{ item.product.name }}</strong>
+          <span>{{ item.size|title|default:"" }} {{ item.flavor|title|default:"" }} × {{ item.quantity }}</span>
+        </div>
+        <span data-line-total="{{ item.product.id }}">{{ item.line_total|intcomma }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const areas = {{ delivery_areas|safe }};
+    const subtotal = {{ cart.subtotal|stringformat:"f" }};
+    const discountTotal = {{ discount|stringformat:"f" }};
+    const areaSelect = document.getElementById('id_delivery_area');
+    const feeEl = document.querySelector('[data-delivery-fee]');
+    const totalEl = document.querySelector('[data-total]');
+    const payBtn = document.querySelector('.js-pay-now');
+
+    if (areaSelect && feeEl && totalEl) {
+      function updateTotals() {
+        const fee = areas[areaSelect.value] || 0;
+        const total = subtotal - discountTotal + fee;
+        feeEl.textContent = fee.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        totalEl.textContent = total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        payBtn.textContent = 'Pay Now — Total: ' + total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+      }
+      areaSelect.addEventListener('change', updateTotals);
+      updateTotals();
+    }
+  })();
+</script>
+{% endblock %}

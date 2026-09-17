@@ -1,0 +1,167 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}{{ product.name }} — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="{% url 'shop:home' %}">Home</a> / <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a> / <span>{{ product.name }}</span>
+</nav>
+
+<div class="product-detail">
+  <div class="pd-gallery">
+    <div class="pd-main">
+      {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<span class="no-photo big">🎂</span>{% endif %}
+    </div>
+    {% if product.gallery.all %}
+    <div class="pd-thumbs">
+      {% for img in product.gallery.all|slice:':4' %}
+      <img src="{{ img.image.url }}" alt="{{ img.alt_text }}" onclick="document.querySelector('.pd-main img').src=this.src">
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="pd-info">
+    <span class="product-cat">{{ product.category.name }}</span>
+    <h1>{{ product.name }}</h1>
+
+    <div class="pd-rating">
+      <span class="stars">{% for _ in ""|ljust:avg_rating %}★{% endfor %}</span>
+      <span>{{ avg_rating|floatformat:1 }} / 5 ({{ review_count }} review{{ review_count|pluralize }})</span>
+    </div>
+
+    <div class="pd-price">
+      {% if product.is_on_sale %}
+      <span class="pd-sale">{{ product.sale_price|intcomma }}</span>
+      <del class="pd-old">{{ product.base_price|intcomma }}</del>
+      <span class="badge-sale">ON SALE</span>
+      {% else %}
+      <span class="pd-regular">{{ product.base_price|intcomma }}</span>
+      {% endif %}
+      <span class="pd-unit">per item</span>
+    </div>
+
+    <p class="pd-desc">{{ product.description }}</p>
+
+    <form method="post" action="{% url 'cart:add' product.slug %}" class="pdp-form">
+      {% csrf_token %}
+      {% if product.sizes %}
+      <div class="form-row">
+        <label>Size / Weight</label>
+        <select name="size" required>
+          <option value="" disabled selected>Choose size</option>
+          {% for s in product.sizes %}
+          <option value="{{ s }}">{{ s|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      {% if product.flavors %}
+      <div class="form-row">
+        <label>Flavour</label>
+        <select name="flavor" required>
+          <option value="" disabled selected>Choose flavour</option>
+          {% for f in product.flavors %}
+          <option value="{{ f }}">{{ f|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="form-row">
+        <label>Quantity</label>
+        <div class="qty-box">
+          <button type="button" class="qty-btn" data-qty="-1">−</button>
+          <input type="number" name="quantity" value="1" min="1" class="qty-input">
+          <button type="button" class="qty-btn" data-qty="1">+</button>
+        </div>
+      </div>
+
+      {% if product.advance_order_days %}
+      <p class="advance-note">📅 Order at least {{ product.advance_order_days }} day{{ product.advance_order_days|pluralize }} in advance for delivery.</p>
+      {% endif %}
+
+      <div class="pdp-actions">
+        <button type="submit" class="btn btn-primary btn-lg">Add to Cart 🛒</button>
+        {% if product.is_customizable %}
+        <a href="{% url 'orders:custom_cake' %}" class="btn btn-outline btn-lg">🎨 Make it Custom</a>
+        {% endif %}
+      </div>
+    </form>
+
+    <div class="pdp-share">
+      <span>Share:</span>
+      <a href="https://wa.me/?text={{ product.name }}%20{{ request.build_absolute_uri }}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener">Facebook</a>
+    </div>
+  </div>
+</div>
+
+<section class="section reviews-section">
+  <div class="section-head">
+    <h2>Customer Reviews</h2>
+    {% if user.is_authenticated %}
+    <button class="btn btn-outline" onclick="document.getElementById('review-form').classList.toggle('hidden')">Write a Review</button>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="link">Login to write a review</a>
+    {% endif %}
+  </div>
+
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'reviews:add' product.slug %}" id="review-form" class="review-form hidden">
+    {% csrf_token %}
+    <div class="star-input">
+      <span>Your rating: </span>
+      <div class="stars" data-star-input>
+        {% for i in "12345" %}<button type="button" data-val="{{ i }}" class="star-btn">★</button>{% endfor %}
+      </div>
+      <input type="hidden" name="rating" id="rating" value="5">
+    </div>
+    <input type="text" name="title" placeholder="Review title (optional)">
+    <textarea name="comment" placeholder="Tell us about your experience..." required></textarea>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+  </form>
+  {% endif %}
+
+  <div class="reviews-list">
+    {% for review in reviews %}
+    <div class="review">
+      <div class="review-head">
+        <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+        <span class="stars">{% for _ in ""|ljust:review.rating %}★{% endfor %}</span>
+        <span class="review-date">{{ review.created|date:"M d, Y" }}</span>
+      </div>
+      {% if review.title %}<h4>{{ review.title }}</h4>{% endif %}
+      <p>{{ review.comment }}</p>
+    </div>
+    {% empty %}
+    <p class="empty">No reviews yet. Be the first to review this product!</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if related %}
+<section class="section">
+  <div class="section-head"><h2>You may also like</h2></div>
+  <div class="product-grid">
+    {% for product in related %}{% include 'shop/_product_card.html' %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const tab = document.querySelector('[data-star-input]');
+  const ratingInput = document.getElementById('rating');
+  if (tab) {
+    tab.querySelectorAll('.star-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        ratingInput.value = btn.dataset.val;
+        tab.querySelectorAll('.star-btn').forEach(b => {
+          b.style.color = parseInt(b.dataset.val) <= parseInt(btn.dataset.val) ? '#ffb400' : '#ddd';
+        });
+      });
+    });
+  }
+</script>
+{% endblock %}

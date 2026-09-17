@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% if user %} — Sweet Treats Bakery{% endif %}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <nav class="breadcrumb"><a href="{% url 'accounts:dashboard' %}">Dashboard</a> / <span>Profile</span></nav>
+  <h1>My Profile</h1>
+
+  <div class="auth-card profile-card">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<span class="field-error">{{ field.errors|striptags }}</span>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

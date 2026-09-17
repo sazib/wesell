@@ -1,0 +1,70 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Shipping Address — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section checkout">
+  <nav class="breadcrumb">
+    <a href="{% url 'cart:detail' %}">Cart</a> /
+    <span>Checkout</span> /
+    <span>Shipping Address</span>
+  </nav>
+
+  <h1>Shipping Address</h1>
+  <p class="checkout-intro">We noticed you don't have a shipping address saved yet. Add one below and we'll remember it for you.</p>
+
+  <div class="checkout-grid">
+    <div class="checkout-form">
+      <form method="post" novalidate class="js-checkout-form">
+        {% csrf_token %}
+
+        <fieldset>
+          <legend>Your Shipping Address</legend>
+          <div class="form-group{% if form.full_name.errors %} error{% endif %}">
+            <label for="{{ form.full_name.id_for_label }}">Full name</label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}<span class="field-error">{{ form.full_name.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.phone.errors %} error{% endif %}">
+            <label for="{{ form.phone.id_for_label }}">Phone number</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<span class="field-error">{{ form.phone.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.address.errors %} error{% endif %}">
+            <label for="{{ form.address.id_for_label }}">Shipping address</label>
+            {{ form.address }}
+            {% if form.address.errors %}<span class="field-error">{{ form.address.errors|striptags }}</span>{% endif %}
+          </div>
+          <div class="form-group{% if form.city.errors %} error{% endif %}">
+            <label for="{{ form.city.id_for_label }}">City</label>
+            {{ form.city }}
+            {% if form.city.errors %}<span class="field-error">{{ form.city.errors|striptags }}</span>{% endif %}
+          </div>
+        </fieldset>
+
+        {% if form.non_field_errors %}
+        <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block" data-disable-on-submit>
+          Save &amp; Continue to Checkout →
+        </button>
+      </form>
+    </div>
+
+    <div class="checkout-sidebar">
+      <h3>Your Order</h3>
+      {% for item in cart.get_items %}
+      <div class="sidebar-item">
+        <div>
+          <strong>{{ item.product.name }}</strong>
+          <span>{{ item.size|title|default:"" }} {{ item.flavor|title|default:"" }} × {{ item.quantity }}</span>
+        </div>
+        <span>{{ item.line_total|intcomma }}</span>
+      </div>
+      {% endfor %}
+      <p class="form-hint" style="margin-top:14px">Your cart is safe — you can review and complete the order after saving your address.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

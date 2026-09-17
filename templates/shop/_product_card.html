@@ -1,0 +1,25 @@
+{% load humanize %}
+<a href="{{ product.get_absolute_url }}" class="product-card">
+  <div class="product-image">
+    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<span class="no-photo">🎂</span>{% endif %}
+    {% if product.is_on_sale %}<span class="badge-sale">SALE</span>{% endif %}
+    {% if product.is_customizable %}<span class="badge-custom">🎨 Customizable</span>{% endif %}
+  </div>
+  <div class="product-body">
+    <span class="product-cat">{{ product.category.name }}</span>
+    <h3>{{ product.name }}</h3>
+    {% with review_count=product.reviews.count %}
+      {% if review_count %}
+      <div class="product-rating">★ {{ review_count }} review{{ review_count|pluralize }}</div>
+      {% endif %}
+    {% endwith %}
+    <div class="product-bottom">
+      {% if product.is_on_sale %}
+      <span class="price"><del>{{ product.base_price|intcomma }}</del> {{ product.sale_price|intcomma }}</span>
+      {% else %}
+      <span class="price">From {{ product.base_price|intcomma }}</span>
+      {% endif %}
+      <span class="quick-add">+</span>
+    </div>
+  </div>
+</a>

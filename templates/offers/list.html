@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Offers — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section">
+  <h1>Offers &amp; Flash Sales 💥</h1>
+
+  {% if running_offers %}
+  <div class="offer-list">
+    {% for offer in running_offers %}
+    <div class="offer-tile">
+      <div class="offer-tile-head">
+        <span class="offer-pill">Live now</span>
+        <h2>{{ offer.name }}</h2>
+        <p>{{ offer.banner_message|default:"Limited-time deal!" }}</p>
+        <div class="offer-countdown" data-offer-end="{{ offer.ends_at|date:'c' }}">
+          <span class="cd-box lg" data-unit="d">00</span><span class="cd-sep">:</span>
+          <span class="cd-box lg" data-unit="h">00</span><span class="cd-sep">:</span>
+          <span class="cd-box lg" data-unit="m">00</span><span class="cd-sep">:</span>
+          <span class="cd-box lg" data-unit="s">00</span>
+        </div>
+        <p class="offer-note">{{ offer.discount_percent }}% off applied automatically at checkout</p>
+        <a href="{{ offer.get_absolute_url }}" class="btn btn-light">Shop the deals</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No running offers right now — check back soon!</p>
+  {% endif %}
+</section>
+{% endblock %}

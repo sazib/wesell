@@ -1,0 +1,77 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Order Confirmation — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section checkout">
+  <nav class="breadcrumb">
+    <a href="{% url 'cart:detail' %}">Cart</a> /
+    <a href="{% url 'orders:checkout' %}">Checkout</a> /
+    <span>Order Confirmation</span>
+  </nav>
+
+  <h1>Review &amp; Confirm Your Order</h1>
+  <p class="checkout-intro">Please review everything below before confirming. Clicking <strong>Confirm &amp; Pay</strong> places your order.</p>
+
+  <div class="checkout-grid">
+    <div class="checkout-review">
+      <div class="sidebar-card">
+        <h3>Items</h3>
+        {% for item in cart.get_items %}
+        <div class="sidebar-item">
+          <div>
+            <strong>{{ item.product.name }}</strong>
+            <span>{{ item.size|title|default:"" }} {{ item.flavor|title|default:"" }} × {{ item.quantity }}</span>
+          </div>
+          <span>{{ item.line_total|intcomma }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Shipping Address</h3>
+        <p><strong>{{ payload.full_name }}</strong><br>{{ payload.address }}, {{ payload.city }}</p>
+        <p>📞 {{ payload.phone }}{% if payload.email %} · ✉️ {{ payload.email }}{% endif %}</p>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Delivery</h3>
+        <p>📅 {{ delivery_date|date:"l, F d, Y" }}{% if payload.delivery_time_slot %} · ⏰ {{ payload.delivery_time_slot }}{% endif %}</p>
+        <p>🚚 {{ delivery_area.name|default:"Self pickup" }} — {{ delivery_fee|intcomma }} delivery fee</p>
+        {% if payload.notes %}
+        <p>📝 {{ payload.notes }}</p>
+        {% endif %}
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Payment Summary</h3>
+        <div class="cart-totals">
+          <div>Subtotal: {{ subtotal|intcomma }}</div>
+          {% if running_offer %}
+          <div class="offer-discount">Offer discount ({{ running_offer.discount_percent }}%): -{{ discount|intcomma }}</div>
+          {% endif %}
+          <div>Delivery: {{ delivery_fee|intcomma }}</div>
+          <div class="grand-total">Total: <strong>{{ total|intcomma }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout-sidebar">
+      <div class="sidebar-card">
+        <h3>Ready to order?</h3>
+        <p>You'll be charged {{ total|intcomma }} on confirmation.</p>
+      </div>
+
+      <form method="post" class="js-checkout-form">
+        {% csrf_token %}
+        <input type="hidden" name="confirm" value="1">
+        <button type="submit" class="btn btn-primary btn-lg btn-block" data-disable-on-submit>
+          Confirm &amp; Pay — {{ total|intcomma }}
+        </button>
+      </form>
+
+      <a href="{% url 'orders:checkout' %}" class="btn btn-outline btn-block" style="margin-top:10px">← Edit Order Details</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

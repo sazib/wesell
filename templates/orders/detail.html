@@ -1,0 +1,86 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Order {{ order.order_number }} — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section order-detail">
+  <nav class="breadcrumb"><a href="{% url 'orders:list' %}">My Orders</a> / <span>{{ order.order_number }}</span></nav>
+
+  <div class="order-header">
+    <h1>Order {{ order.order_number }}</h1>
+    <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+  </div>
+
+  <div class="checkout-grid">
+    <div>
+      <h3>Items</h3>
+      {% for item in order.get_items %}
+      <div class="sidebar-item">
+        <div>
+          <strong>{{ item.product_name }}</strong>
+          <span>
+            {% if item.size %}{{ item.size|title }}{% endif %}
+            {% if item.flavor %} / {{ item.flavor|title }}{% endif %}
+            × {{ item.quantity }}
+          </span>
+        </div>
+        <span>{{ item.line_total|intcomma }}</span>
+      </div>
+      {% endfor %}
+
+      <div class="cart-totals">
+        <div>Subtotal: {{ order.subtotal|intcomma }}</div>
+        {% if order.discount %}<div>Discount: -{{ order.discount|intcomma }}</div>{% endif %}
+        <div>Delivery: {{ order.delivery_fee|intcomma }}</div>
+        <div><strong>Total: {{ order.total|intcomma }}</strong></div>
+      </div>
+
+      {% if order.is_custom_order and order.custom_cake %}
+      <div class="custom-cake-summary">
+        <h3>Custom Cake Details</h3>
+        <ul>
+          <li><strong>Occasion:</strong> {{ order.custom_cake.occasion }}</li>
+          {% if order.custom_cake.theme %}<li><strong>Theme:</strong> {{ order.custom_cake.theme }}</li>{% endif %}
+          <li><strong>Size:</strong> {{ order.custom_cake.size|title }}</li>
+          <li><strong>Flavour:</strong> {{ order.custom_cake.flavor|title }}</li>
+          {% if order.custom_cake.filling %}<li><strong>Filling:</strong> {{ order.custom_cake.filling|title }}</li>{% endif %}
+          {% if order.custom_cake.reference_photo %}<li><strong>Reference:</strong> {{ order.custom_cake.reference_photo }}</li>{% endif %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="sidebar-card">
+        <h3>Delivery Info</h3>
+        <p><strong>{{ order.full_name }}</strong></p>
+        <p>{{ order.address }}, {{ order.city }}</p>
+        <p>📞 {{ order.phone }}</p>
+        {% if order.delivery_date %}<p>📅 Delivery: {{ order.delivery_date }}</p>{% endif %}
+        {% if order.delivery_time_slot %}<p>⏰ Time: {{ order.delivery_time_slot }}</p>{% endif %}
+        {% if order.notes %}<p>📝 {{ order.notes }}</p>{% endif %}
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Payment</h3>
+        <p>Status: <strong class="pay-status-{{ order.payment_status }}">{{ order.get_payment_status_display }}</strong></p>
+        {% if order.payment_reference %}<p>Reference: {{ order.payment_reference }}</p>{% endif %}
+        {% if order.payment_gateway %}<p>Gateway: {{ order.payment_gateway }}</p>{% endif %}
+      </div>
+
+      {% if order.status == 'pending' and user.is_authenticated and order.user == user %}
+      <form method="post" action="{% url 'orders:cancel' order.order_number %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline btn-block">Cancel Order</button>
+      </form>
+      {% endif %}
+
+      {% if running_offer %}
+      <div class="sidebar-card offer-card-mini">
+        <p>{{ running_offer.discount_percent }}% discount applied if any items are on offer</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

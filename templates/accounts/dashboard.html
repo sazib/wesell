@@ -1,0 +1,53 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Dashboard — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section">
+  <h1>Hi, {{ user.get_full_name|default:user.username }}! 👋</h1>
+
+  <div class="dash-grid">
+    <a href="{% url 'orders:list' %}" class="dash-card">
+      <span class="dash-icon">📦</span>
+      <strong>{{ orders|length }}</strong>
+      <span>Recent Orders</span>
+    </a>
+    <a href="{% url 'orders:custom_cake' %}" class="dash-card">
+      <span class="dash-icon">🎨</span>
+      <strong>Design</strong>
+      <span>Custom Cake</span>
+    </a>
+    <a href="{% url 'accounts:profile' %}" class="dash-card">
+      <span class="dash-icon">👤</span>
+      <strong>Edit</strong>
+      <span>Profile</span>
+    </a>
+    <a href="{% url 'cart:detail' %}" class="dash-card">
+      <span class="dash-icon">🛒</span>
+      <strong>{{ cart_count }}</strong>
+      <span>Cart Items</span>
+    </a>
+  </div>
+
+  <h2>Recent Orders</h2>
+  <div class="order-list">
+    {% for order in orders %}
+    <a href="{{ order.get_absolute_url }}" class="order-card">
+      <div class="order-card-head">
+        <strong>{{ order.order_number }}</strong>
+        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+      </div>
+      <div class="order-card-body">
+        <span>{{ order.created|date:"M d, Y" }}</span>
+        <span>Total: {{ order.total|intcomma }}</span>
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-state">
+      <p>No orders yet — let's change that! 🍰</p>
+      <a href="{% url 'shop:home' %}" class="btn btn-primary">Browse the menu</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

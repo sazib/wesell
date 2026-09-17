@@ -1,0 +1,37 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Order Confirmed {{ order.order_number }} — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section success-page">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h1>Thank you!</h1>
+    <p class="success-sub">Your order <strong>{{ order.order_number }}</strong> has been confirmed.</p>
+
+    <div class="success-details">
+      <div>
+        <strong>Total:</strong> {{ order.total|intcomma }}
+      </div>
+      {% if order.delivery_date %}
+      <div><strong>Delivery Date:</strong> {{ order.delivery_date|date:"l, F d, Y" }}</div>
+      {% endif %}
+      {% if order.delivery_time_slot %}
+      <div><strong>Time Slot:</strong> {{ order.delivery_time_slot }}</div>
+      {% endif %}
+      <div><strong>Payment:</strong> {{ order.get_payment_status_display }}</div>
+    </div>
+
+    <p>You will receive a confirmation shortly. We may reach out via WhatsApp to confirm details.</p>
+
+    <div class="success-actions">
+      <a href="{{ order.get_absolute_url }}" class="btn btn-primary">View Order Details</a>
+      <a href="{% url 'shop:home' %}" class="btn btn-outline">Continue Shopping</a>
+    </div>
+
+    {% if whatsapp_number %}
+    <p class="whatsapp-text">Questions? <a href="https://wa.me/{{ whatsapp_number }}?text=Hi!%20I%20have%20a%20question%20about%20order%20{{ order.order_number }}" target="_blank" rel="noopener">Chat with us on WhatsApp 💬</a></p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

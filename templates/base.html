@@ -1,0 +1,126 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Sweet Treats Bakery{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  {% if running_offer %}
+  <div class="offer-banner" data-offer-end="{{ running_offer.ends_at|date:'c' }}">
+    <div class="container offer-banner-inner">
+      <span class="offer-banner-text">🔥 {{ running_offer.banner_message|default:running_offer.name }} — {{ running_offer.discount_percent }}% OFF</span>
+      <div class="offer-countdown" id="offer-countdown">
+        <span class="cd-box" data-unit="d">00</span><span class="cd-sep">:</span>
+        <span class="cd-box" data-unit="h">00</span><span class="cd-sep">:</span>
+        <span class="cd-box" data-unit="m">00</span><span class="cd-sep">:</span>
+        <span class="cd-box" data-unit="s">00</span>
+      </div>
+      <a href="{{ running_offer.get_absolute_url }}" class="offer-banner-link">Shop now</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{% url 'shop:home' %}" class="brand">
+        <span class="brand-icon">🧁</span>
+        <span class="brand-name">Sweet Treats</span>
+        <span class="brand-tag">Home Bakery &amp; Custom Cakes</span>
+      </a>
+      <form action="{% url 'shop:search' %}" method="get" class="search-form">
+        <input type="search" name="q" placeholder="Search cakes, cookies..." value="{{ query|default:'' }}">
+        <button type="submit">Search</button>
+      </form>
+      <nav class="header-actions">
+        <a href="{% url 'cart:detail' %}" class="action-link cart-link">
+          <span class="cart-icon">🛒</span>
+          Cart
+          {% if cart_count %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+        </a>
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+          <button class="action-link user-trigger">👤 {{ user.username }}</button>
+          <div class="user-dropdown">
+            <a href="{% url 'accounts:dashboard' %}">My Orders</a>
+            <a href="{% url 'accounts:profile' %}">Profile</a>
+            <a href="{% url 'orders:list' %}">Order History</a>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit">Logout</button></form>
+          </div>
+        </div>
+        {% else %}
+        <a href="{% url 'accounts:login' %}" class="action-link">Login</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign up</a>
+        {% endif %}
+      </nav>
+    </div>
+    <nav class="category-nav">
+      <div class="container">
+        <a href="{% url 'shop:home' %}">Home</a>
+        {% for cat in nav_categories %}
+        <a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+        {% endfor %}
+        <a href="{% url 'orders:custom_cake' %}" class="nav-highlight">🎨 Custom Cake</a>
+        <a href="{% url 'offers:list' %}">🏷️ Offers</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Sweet Treats Bakery</h4>
+        <p>Handcrafted cakes and treats baked with love, delivered to your door.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="{% url 'shop:home' %}">Home</a>
+        <a href="{% url 'orders:custom_cake' %}">Custom Cake Studio</a>
+        <a href="{% url 'orders:list' %}">Track Order</a>
+        <a href="{% url 'offers:list' %}">Offers</a>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        {% for cat in nav_categories %}
+        <a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+        {% endfor %}
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a href="https://wa.me/{{ whatsapp_number|default:'1234567890' }}" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="{{ messenger_url|default:'#' }}">Facebook Messenger</a>
+        <a href="{% url 'accounts:register' %}">Create Account</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; {% now "Y" %} Sweet Treats Bakery. Baked fresh, delivered fresh.</p>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/{{ whatsapp_number|default:'1234567890' }}" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 32 32" width="28" height="28" fill="white"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.1.6 2.4 1 3.7 1 6.6 0 12-5.4 12-12S22.6 3 16 3zm5.8 16.8c-.8.8-1.8 1.2-3.3 1.1-1 0-2-.4-3.6-1.2-2.8-1.4-4.6-4-5-4.4-.5-.6-1.6-2.1-1.6-4s1-2.9 1.3-3.3c.4-.4.8-.5 1.1-.5h.8c.2 0 .5-.1.8.6.3.7.9 2.4 1 2.6.1.2.1.4 0 .6-.1.2-.1.4-.3.6-.2.2-.3.4-.6.6-.2.2-.4.4-.2.8.2.4.9 1.5 2 2.4 1.3 1.1 2.4 1.5 2.7 1.6.3.2.6.1.7 0 .2-.2.7-.8 1-1.2.3-.4.5-.3.8-.2.3.1 1.7.8 2 1 .3.2.5.3.6.4.1.2.1.8-.3 1.6z"/></svg>
+  </a>
+
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}Your Cart — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section">
+  <h1>Your Cart</h1>
+
+  {% if cart.is_empty %}
+  <div class="empty-state">
+    <p>🛒 Your cart is empty.</p>
+    <a href="{% url 'shop:home' %}" class="btn btn-primary">Start shopping</a>
+  </div>
+  {% else %}
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Size</th>
+        <th>Flavour</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for item in items %}
+      <tr>
+        <td class="cart-product">
+          {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="" class="cart-thumb">{% endif %}
+          <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+        </td>
+        <td>{{ item.size|title|default:"-" }}</td>
+        <td>{{ item.flavor|title|default:"-" }}</td>
+        <td>{{ item.unit_price|intcomma }}</td>
+        <td>
+          <form method="post" action="{% url 'cart:update' item.id %}" class="inline-form">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99" onchange="this.form.submit()" class="qty-input-sm">
+          </form>
+        </td>
+        <td><strong>{{ item.line_total|intcomma }}</strong></td>
+        <td>
+          <form method="post" action="{% url 'cart:remove' item.id %}">{% csrf_token %}<button type="submit" class="btn-icon">✕</button></form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="cart-summary">
+    <form method="post" action="{% url 'cart:clear' %}" class="inline-form">{% csrf_token %}
+      <button type="submit" class="btn btn-outline">Clear Cart</button>
+    </form>
+    <div class="cart-totals">
+      <div><span>Subtotal:</span> <strong>{{ subtotal|intcomma }}</strong></div>
+      <a href="{% url 'orders:checkout' %}" class="btn btn-primary btn-lg">Proceed to Checkout →</a>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

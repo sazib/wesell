@@ -1,0 +1,58 @@
+{% extends 'base.html' %}{% load humanize %}
+
+{% block title %}My Orders — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section">
+  <nav class="breadcrumb"><a href="{% url 'accounts:dashboard' %}">Dashboard</a> / <span>My Orders</span></nav>
+
+  <h1>My Orders</h1>
+
+  {% if active %}
+  <h2>Active Orders</h2>
+  <div class="order-list">
+    {% for order in active %}
+    <a href="{{ order.get_absolute_url }}" class="order-card">
+      <div class="order-card-head">
+        <strong>{{ order.order_number }}</strong>
+        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+      </div>
+      <div class="order-card-body">
+        <span>Total: {{ order.total|intcomma }}</span>
+        <span>Delivery: {{ order.delivery_date|date:"M d, Y" }}</span>
+        <span>{{ order.get_items.count }} item{{ order.get_items.count|pluralize }}</span>
+      </div>
+      {% if order.is_custom_order %}
+      <span class="badge-custom">Custom Order</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if past %}
+  <h2>Past Orders</h2>
+  <div class="order-list">
+    {% for order in past %}
+    <a href="{{ order.get_absolute_url }}" class="order-card">
+      <div class="order-card-head">
+        <strong>{{ order.order_number }}</strong>
+        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+      </div>
+      <div class="order-card-body">
+        <span>Total: {{ order.total|intcomma }}</span>
+        <span>{{ order.get_items.count }} item{{ order.get_items.count|pluralize }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not active and not past %}
+  <div class="empty-state">
+    <p>You haven't placed any orders yet.</p>
+    <a href="{% url 'shop:home' %}" class="btn btn-primary">Browse our treats</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section auth-page">
+  <div class="auth-card">
+    <h1>Welcome Back</h1>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group{% if form.username.errors %} error{% endif %}">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}<span class="field-error">{{ form.username.errors|striptags }}</span>{% endif %}
+      </div>
+      <div class="form-group{% if form.password.errors %} error{% endif %}">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}<span class="field-error">{{ form.password.errors|striptags }}</span>{% endif %}
+      </div>
+      {% if form.non_field_errors %}
+      <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+    <p class="auth-alt">Don't have an account? <a href="{% url 'accounts:register' %}">Sign up</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Sweet Treats Bakery — Cakes, Cookies &amp; Custom Design{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h1>Baked fresh, <span>made with love</span></h1>
+      <p>Birthday cakes, bento cakes, cupcakes, cookies, brownies and fully custom-designed creations — order online and get fresh-baked goodness delivered to your door.</p>
+      <div class="hero-actions">
+        <a href="{% url 'orders:custom_cake' %}" class="btn btn-primary">Design Your Cake 🎨</a>
+        <a href="{% url 'shop:home' %}#featured" class="btn btn-outline">Browse Menu</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>200+</strong> Happy Orders</div>
+        <div><strong>4.9★</strong> Average Rating</div>
+        <div><strong>24h</strong> Advance Delivery</div>
+      </div>
+    </div>
+    <div class="hero-cake">🎂</div>
+  </div>
+</section>
+
+{% if running_offer %}
+<section class="offer-section">
+  <div class="offer-card">
+    <div class="offer-card-text">
+      <span class="offer-pill">Limited time</span>
+      <h2>{{ running_offer.name }}</h2>
+      <p>{{ running_offer.banner_message|default:"Save big before the timer runs out!" }}</p>
+      <div class="offer-countdown" data-offer-end="{{ running_offer.ends_at|date:'c' }}">
+        <span class="cd-box lg" data-unit="d">00</span><span class="cd-sep">:</span>
+        <span class="cd-box lg" data-unit="h">00</span><span class="cd-sep">:</span>
+        <span class="cd-box lg" data-unit="m">00</span><span class="cd-sep">:</span>
+        <span class="cd-box lg" data-unit="s">00</span>
+      </div>
+      <a href="{{ running_offer.get_absolute_url }}" class="btn btn-light">See {{ running_offer.discount_percent }}% off deals</a>
+    </div>
+    {% if offer_products %}
+    <div class="offer-card-products">
+      {% for p in offer_products|slice:':3' %}
+      <a href="{{ p.get_absolute_url }}" class="mini-product">
+        <div class="mini-thumb">{% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}">{% else %}🎂{% endif %}</div>
+        <div class="mini-info">
+          <strong>{{ p.name|truncatechars:22 }}</strong>
+          <span class="mini-price">
+            <del>{{ p.base_price|intcomma }}</del> {{ p.current_price|intcomma }}
+          </span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section" id="featured">
+  <div class="section-head">
+    <h2>Customer Favourites</h2>
+    <a href="#all-products" class="link">View all</a>
+  </div>
+  <div class="product-grid">
+    {% for product in featured %}
+      {% include 'shop/_product_card.html' %}
+    {% empty %}
+      <p class="empty">Featured products coming soon!</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Shop by Category</h2></div>
+  <div class="category-grid">
+    {% for cat in categories %}
+    <a href="{{ cat.get_absolute_url }}" class="category-card">
+      {% if cat.image %}<img src="{{ cat.image.url }}" alt="{{ cat.name }}">{% else %}<div class="cat-emoji">🎂</div>{% endif %}
+      <h3>{{ cat.name }}</h3>
+      <p>{{ cat.products.count }} products</p>
+    </a>
+    {% endfor %}
+    <a href="{% url 'orders:custom_cake' %}" class="category-card custom-card">
+      <div class="cat-emoji">🎨</div>
+      <h3>Custom Cake Studio</h3>
+      <p>Design your dream cake</p>
+    </a>
+  </div>
+</section>
+
+<section class="section" id="all-products">
+  <div class="section-head"><h2>Newest Treats</h2></div>
+  <div class="product-grid">
+    {% for product in newest %}
+      {% include 'shop/_product_card.html' %}
+    {% empty %}
+      <p class="empty">We're baking something new...</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section features-strip">
+  <div class="feature"><span>🛡️</span> Hygiene First</div>
+  <div class="feature"><span>🚚</span> Home Delivery</div>
+  <div class="feature"><span>📅</span> Advance Ordering</div>
+  <div class="feature"><span>💬</span> WhatsApp Support</div>
+</section>
+{% endblock %}
