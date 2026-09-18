@@ -1,3 +1,7 @@
 gunicorn==21.2.0
 django
 pillow
+psycopg[binary]
+dj-database-url
+redis
+whitenoise
