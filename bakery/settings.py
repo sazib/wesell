@@ -8,9 +8,12 @@ SECRET_KEY = os.environ.get(
     "django-insecure-%v%_u!dn86@==v(x2hydaj$k&977t_#87m784zs^9xw!1@9fw@",
 )
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
+# DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
+DJANGO_DEBUG=False
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    "*.up.railway.app",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
