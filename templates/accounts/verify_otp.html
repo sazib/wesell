@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Code — Sweet Treats Bakery{% endblock %}
+
+{% block content %}
+<section class="section auth-page">
+  <div class="auth-card">
+    <h1>Verify Code</h1>
+    <p>
+      {% if email %}
+      Enter the 6-digit code we sent to <strong>{{ email }}</strong>.
+      {% else %}
+      Enter the 6-digit code you received by email.
+      {% endif %}
+    </p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group{% if form.otp.errors %} error{% endif %}">
+        <label for="{{ form.otp.id_for_label }}">One-Time Password</label>
+        {{ form.otp }}
+        {% if form.otp.errors %}<span class="field-error">{{ form.otp.errors|striptags }}</span>{% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Verify Code</button>
+    </form>
+    <p class="auth-alt">Didn't get a code? <a href="{% url 'accounts:forgot_password' %}">Resend code</a></p>
+  </div>
+</section>
+{% endblock %}

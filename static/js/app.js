@@ -39,6 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Show / hide password toggles.
+  document.querySelectorAll('.password-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      const wasPassword = input.type === 'password';
+      input.type = wasPassword ? 'text' : 'password';
+      btn.classList.toggle('showing', wasPassword);
+      btn.setAttribute('aria-label', wasPassword ? 'Hide password' : 'Show password');
+      input.focus({ preventScroll: true });
+      const pos = input.selectionStart;
+      input.setSelectionRange(pos, pos);
+    });
+  });
+
   setTimeout(() => {
     document.querySelectorAll('.alert').forEach((a) => {
       a.style.transition = 'opacity .6s';

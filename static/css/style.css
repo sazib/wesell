@@ -373,6 +373,28 @@ input, select, textarea, button { font-family: inherit; font-size: 0.95rem; }
 .auth-card form { display: grid; gap: 0; }
 .auth-alt { text-align: center; margin-top: 18px; font-size: 0.9rem; }
 .profile-card { max-width: 560px; }
+.forgot-link { text-align: right; margin: -6px 0 12px; font-size: 0.85rem; font-weight: 700; }
+
+.password-policy { list-style: none; display: grid; gap: 6px; margin: 0 0 14px; font-size: 0.84rem; }
+.password-policy li { display: flex; align-items: center; gap: 9px; color: var(--text-soft); font-weight: 700; transition: color .15s ease; }
+.password-policy li.not-met { color: #dc2626; }
+.password-policy li.met { color: var(--green); }
+.policy-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; transition: background .15s ease, box-shadow .15s ease; }
+.password-policy li.not-met .policy-dot { background: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
+.password-policy li.met .policy-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15); }
+
+.password-field { position: relative; }
+.password-field input { padding-right: 46px !important; }
+.password-toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; padding: 4px; cursor: pointer;
+  color: var(--text-soft); display: grid; place-items: center; line-height: 0;
+  border-radius: 8px;
+}
+.password-toggle:hover { color: var(--primary); }
+.password-toggle .eye-closed { display: none; }
+.password-toggle.showing .eye-closed { display: block; }
+.password-toggle.showing .eye-open { display: none; }
 
 /* ---------- Dashboard ---------- */
 .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin: 22px 0 30px; }
