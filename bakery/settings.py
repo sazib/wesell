@@ -15,6 +15,9 @@ DJANGO_DEBUG=False
 
 ALLOWED_HOSTS = [
     "*.up.railway.app",
+    ".railway.internal",
+    "127.0.0.1",
+    "localhost",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
