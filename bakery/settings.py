@@ -133,5 +133,17 @@ MESSENGER_PAGE_URL = os.environ.get("MESSENGER_PAGE_URL", "")
 ORDER_SUCCESS_URL = "/orders/success/"
 ORDER_CANCEL_URL = "/orders/"
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {
+        "django.security.DisallowedHost": {
+            "handlers": ["console"],
+            "level": "ERROR",
+        },
+    },
+}
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Sweet Treats Bakery <orders@sweettreats.local>")
